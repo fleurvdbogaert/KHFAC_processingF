@@ -1,0 +1,66 @@
+function [pres_out] = contDetection(pres_in)
+%% CONTDETECT: automatically detects contractions  
+% INPUT
+%   - pressure: pressure signal
+% OUTPUT = 
+%   - int_cont: interval contractions, start and end times 
+
+pres = pres_in ; 
+pres_out = pres_in ; 
+
+for i = 1:size(pres,2) % loop over pressure channels  
+    if isempty(pres{1,i})==0 % measurement channel used pressure 
+        % Variables 
+        mod = pres{2,i} ; 
+        fs = pres{3,i} ; 
+        t = linspace(1,length(mod),length(mod)) ; 
+        
+        % Find contraction peaks 
+        %was al groenp_peaks = smoothdata(mod,'SmoothingFactor', 0.01);       
+        %[~, locs_max]= findpeaks(mod, 'MinPeakDistance',70, 'MinPeakProminence', 5);
+        
+        % Find the valleys 
+        %p_valleys = smoothdata(mod,'SmoothingFactor', 0.0007);
+        %[~, locs_min] = findpeaks(-p_valleys, 'MinPeakDistance', ...
+            %4, 'MinPeakProminence', 0.3);  
+        [~, locs_max]=findpeaks(mod, 'MinPeakDistance',150000, 'MinPeakProminence', 5)
+        p_valleys = smoothdata(mod,'SmoothingFactor', 0.005);
+        findpeaks(p_valleys, 'MinPeakDistance',150000, 'MinPeakProminence', 5)
+        [~, locs_min2] = findpeaks(-p_valleys, 'MinPeakDistance', ...
+            4, 'MinPeakProminence', 0.3);  
+        % Determine start times per contractions 
+     startcont = zeros(size(locs_max)); %preallocate   
+     for ii=1:length(locs_max) 
+       if sum(locs_min < locs_max(ii)) ~= 0 
+               low_locs = locs_min(locs_min < locs_max(ii));
+               %idx=length(low_locs)
+               [~,idx]=min(abs(low_locs-locs_max(ii)));
+               minVal=low_locs(idx);
+               startcont(ii) = minVal ;
+       end 
+     end 
+    if isempty(locs_max) && isempty(startcont) == 1 % cont stim 
+        startcont = NaN ;    % beginning stim is one 
+        endcont = NaN ;  % end stim is end 
+
+    else%if isempty(locs_max) && isempty(startcont) == 0
+         if size(locs_max,1) == size(startcont,1) 
+             endcont = locs_max ; 
+         elseif size(locs_max,1) > size(startcont,1) 
+             startcont = [1 startcont] ; 
+             endcont = locs_max ; 
+         elseif size(startcont,1)> size(locs_max,1)
+             endcont = [locs_max t(end)] ; 
+         end 
+    end 
+    int = {[startcont endcont]} ; 
+    elseif isempty(pres{1,i})==1 
+        int = {[]} ; 
+    else 
+        int = {NaN(1,2)};
+    end
+    pres_out(4,i) = int ;
+end 
+%end
+
+
