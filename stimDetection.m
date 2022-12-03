@@ -67,8 +67,8 @@ for i = 1:size(stim_in,2)
             if (rem(length(locs),2) ~= 0)==1
                 % Start: low std left and high std right  
                 % Start: high std left and low std right  
-                startstim = zeros((length(locs)+1)/2) ; 
-                endstim = zeros((length(locs)+1)/2) ;
+                startstim = zeros(((length(locs)+1)/2),1) ; 
+                endstim = zeros(((length(locs)+1)/2),1) ;
     
                 for l = 1:length(locs)
                     % Take range of 1000 for window 
@@ -100,8 +100,8 @@ for i = 1:size(stim_in,2)
                 end 
             % even locs > stim started and ended 
             elseif (rem(length(locs),2) == 0) ==1
-                startstim = zeros(length(locs)/2) ; 
-                endstim = zeros(length(locs)/2) ;
+                startstim = zeros((length(locs)/2),1) ; 
+                endstim = zeros((length(locs)/2),1) ;
     
                 for l = 1:length(locs)
                     % Take range of 1000 for window  
